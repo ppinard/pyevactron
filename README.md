@@ -1,7 +1,6 @@
 # pyevactron
 
 ![GitHub Workflow Status](https://img.shields.io/github/workflow/status/ppinard/pyevactron/CI)
-![PyPI](https://img.shields.io/pypi/v/pyevactron)
 
 Interface for the XEI Evactron de-contaminator. 
 The interface is build on top of the XEI Evactron de-contaminator API.
@@ -13,11 +12,11 @@ The best way to connect to the device is to use Python context manager:
 
 ```python
 
-    from pyevactron.interface import connect
-    
-    comm_port = 1 # Communication port
-    with connect(comm_port) as ev:
-        print(ev.pressure_Pa)
+from pyevactron.interface import connect
+
+comm_port = 1 # Communication port
+with connect(comm_port) as ev:
+    print(ev.pressure_Pa)
 ```
         
 The context manager ensures that the interface is disconnected from the 
