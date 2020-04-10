@@ -1,38 +1,4 @@
-#!/usr/bin/env python
-"""
-================================================================================
-:mod:`interface` -- Interface for the XEI Evactron de-contaminator
-================================================================================
-
-.. module:: interface
-   :synopsis: Interface for the XEI Evactron de-contaminator
-
-.. inheritance-diagram:: pyevactron.interface
-
-The interface is build on top of the XEI Evactron de-contaminator API.
-It wraps all functions available through the EvactronComm DLL which allow
-modification to the configuration (plasma pressure/power/time, etc.) and access
-to the measurements (pressure, power, time left, etc.)
-
-The best way to connect to the device is to use Python context manager::
-
-    from pyevactron.interface import connect
-    
-    comm_port = 1 # Communication port
-    with connect(comm_port) as ev:
-        print ev.pressure_Pa
-        
-The context manager ensures that the interface is disconnected from the 
-device in the event of an error.
-
-"""
-
-# Script information for the file.
-__author__ = "Philippe T. Pinard"
-__email__ = "philippe.pinard@gmail.com"
-__version__ = "0.1"
-__copyright__ = "Copyright (c) 2012 Philippe T. Pinard"
-__license__ = "GPL v3"
+""""""
 
 # Standard library modules.
 import os
@@ -52,33 +18,47 @@ TORR2PA = 133.322
 EVR_OK = 0
 EVR_COMMANDIGNORED = 1403
 
+
 class EvactronException(Exception):
     pass
+
 
 class EvactronFault(Exception):
     pass
 
-LowPressureFault = EvactronFault('The unit has encountered a low pressure fault.')
-HighPressureFault = EvactronFault('The unit has encountered a high pressure fault.')
-PlasmaFault = EvactronFault('The unit has encountered a plasma fault.')
-PlasmaOutFault = EvactronFault('The unit has detected that the plasma went out during the plasma state.')
-CableFault = EvactronFault('The RF cable is not connected.')
-PressureGaugeFault = EvactronFault('The pressure gauge is not connected.')
-EepromConfigFault = EvactronFault('The EEPROM configuration has become corrupted. It will be reset to factory defaults once acknowledged.')
-EventLogFault = EvactronFault('The event log has become corrupted. It will be cleared and reformatted once the fault has been acknowledged.')
-InternalFault = EvactronFault('An internal error has occurred.')
-PressureTableFault = EvactronFault('An invalid pressure conversion table has been detected.')
 
-_FAULTS = {1: LowPressureFault,
-           2: HighPressureFault,
-           3: PlasmaFault,
-           4: PlasmaOutFault,
-           7: CableFault,
-           8: PressureGaugeFault,
-           9: EepromConfigFault,
-           10: EventLogFault,
-           11: InternalFault,
-           12: PressureTableFault}
+LowPressureFault = EvactronFault("The unit has encountered a low pressure fault.")
+HighPressureFault = EvactronFault("The unit has encountered a high pressure fault.")
+PlasmaFault = EvactronFault("The unit has encountered a plasma fault.")
+PlasmaOutFault = EvactronFault(
+    "The unit has detected that the plasma went out during the plasma state."
+)
+CableFault = EvactronFault("The RF cable is not connected.")
+PressureGaugeFault = EvactronFault("The pressure gauge is not connected.")
+EepromConfigFault = EvactronFault(
+    "The EEPROM configuration has become corrupted. It will be reset to factory defaults once acknowledged."
+)
+EventLogFault = EvactronFault(
+    "The event log has become corrupted. It will be cleared and reformatted once the fault has been acknowledged."
+)
+InternalFault = EvactronFault("An internal error has occurred.")
+PressureTableFault = EvactronFault(
+    "An invalid pressure conversion table has been detected."
+)
+
+_FAULTS = {
+    1: LowPressureFault,
+    2: HighPressureFault,
+    3: PlasmaFault,
+    4: PlasmaOutFault,
+    7: CableFault,
+    8: PressureGaugeFault,
+    9: EepromConfigFault,
+    10: EventLogFault,
+    11: InternalFault,
+    12: PressureTableFault,
+}
+
 
 class EvactronState(object):
     def __init__(self, message):
@@ -94,31 +74,33 @@ class EvactronState(object):
     def message(self):
         return self._message
 
-InvalidState = EvactronState('Invalid state')
-StartupState = EvactronState('Starting up')
-InitializedState = EvactronState('Initialized')
-ReadyState = EvactronState('Ready')
-StabilizingPressureState = EvactronState('Stabiliing pressure')
-WaitForIgnitionState = EvactronState('Waiting for ignition')
-CleaningState = EvactronState('Cleaning')
-PurgingState = EvactronState('Purging')
-PumpDownState = EvactronState('Pumping down')
-ConfigurationState = EvactronState('Front panel configuration on')
 
-_STATES = {-1: InvalidState,
-            0: StartupState,
-            1: InitializedState,
-           10: ReadyState,
-           11: StabilizingPressureState,
-           12: WaitForIgnitionState,
-           13: CleaningState,
-           14: PurgingState,
-           15: PumpDownState,
-           32: ConfigurationState}
+InvalidState = EvactronState("Invalid state")
+StartupState = EvactronState("Starting up")
+InitializedState = EvactronState("Initialized")
+ReadyState = EvactronState("Ready")
+StabilizingPressureState = EvactronState("Stabiliing pressure")
+WaitForIgnitionState = EvactronState("Waiting for ignition")
+CleaningState = EvactronState("Cleaning")
+PurgingState = EvactronState("Purging")
+PumpDownState = EvactronState("Pumping down")
+ConfigurationState = EvactronState("Front panel configuration on")
 
-_PRESSURE_UNITS = {0: 'Torr',
-                   1: 'Pa',
-                   2: 'mbar'}
+_STATES = {
+    -1: InvalidState,
+    0: StartupState,
+    1: InitializedState,
+    10: ReadyState,
+    11: StabilizingPressureState,
+    12: WaitForIgnitionState,
+    13: CleaningState,
+    14: PurgingState,
+    15: PumpDownState,
+    32: ConfigurationState,
+}
+
+_PRESSURE_UNITS = {0: "Torr", 1: "Pa", 2: "mbar"}
+
 
 def connect(comm_port):
     """
@@ -126,8 +108,8 @@ def connect(comm_port):
     """
     return EvactronInterface(comm_port)
 
-class EvactronInterface(object):
 
+class EvactronInterface(object):
     def __init__(self, comm_port):
         """
         Creates the interface to the Evactron device.
@@ -138,7 +120,7 @@ class EvactronInterface(object):
         self._comm_port = comm_port
 
         dirname = os.path.dirname(sys.modules[__name__].__file__)
-        path = os.path.join(dirname, 'EvactronComm_VB6.dll')
+        path = os.path.join(dirname, "EvactronComm_VB6.dll")
         self._dll = c.WinDLL(path)
 
         self._handle = None
@@ -150,7 +132,7 @@ class EvactronInterface(object):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.disconnect()
 
-#- Action methods
+    # - Action methods
 
     def connect(self):
         """
@@ -163,9 +145,9 @@ class EvactronInterface(object):
         retval = c.c_int()
         handle = self._dll.evbConnect(c.c_int(self._comm_port), c.byref(retval))
         if retval.value != EVR_OK:
-            raise EvactronException, 'Cannot connect to device on port %i' % self._comm_port
+            raise EvactronException, "Cannot connect to device on port %i" % self._comm_port
 
-        logging.debug('Connected to handle=%s' % handle)
+        logging.debug("Connected to handle=%s" % handle)
         self._handle = c.c_long(handle)
 
     def disconnect(self):
@@ -181,9 +163,9 @@ class EvactronInterface(object):
 
         retval = self._dll.evbDisconnect(self._handle)
         if retval != EVR_OK:
-            raise EvactronException, 'Cannot disconnect from device'
+            raise EvactronException, "Cannot disconnect from device"
 
-        logging.debug('Disconnected')
+        logging.debug("Disconnected")
         self._handle = None
 
     def is_connected(self):
@@ -212,7 +194,7 @@ class EvactronInterface(object):
         """
         self.enable(False)
 
-#- Faults
+    # - Faults
 
     @property
     def faults(self):
@@ -258,8 +240,9 @@ class EvactronInterface(object):
         dynamic_bit = c.c_long()
         latched_bit = c.c_long()
 
-        retval = self._dll.evbGetFaults(self._handle, c.byref(latched_bit),
-                                        c.byref(dynamic_bit))
+        retval = self._dll.evbGetFaults(
+            self._handle, c.byref(latched_bit), c.byref(dynamic_bit)
+        )
         if retval != EVR_OK:
             raise EvactronException
 
@@ -274,7 +257,7 @@ class EvactronInterface(object):
         if retval != EVR_OK and retval != EVR_COMMANDIGNORED:
             raise EvactronException
 
-#- Read only
+    # - Read only
 
     def _get_status(self):
         """
@@ -288,16 +271,26 @@ class EvactronInterface(object):
         units = c.c_int()
         status = c.c_long()
 
-        retval = \
-            self._dll.evbGetStatusEx(self._handle, c.byref(state), c.byref(cycle),
-                                     c.byref(hour), c.byref(minute), c.byref(second),
-                                     c.byref(units), c.byref(status))
+        retval = self._dll.evbGetStatusEx(
+            self._handle,
+            c.byref(state),
+            c.byref(cycle),
+            c.byref(hour),
+            c.byref(minute),
+            c.byref(second),
+            c.byref(units),
+            c.byref(status),
+        )
         if retval != EVR_OK:
             raise EvactronException
 
-        return (_STATES.get(state.value, state.value), cycle.value,
-                datetime.time(hour.value, minute.value, second.value),
-                _PRESSURE_UNITS[units.value], status.value)
+        return (
+            _STATES.get(state.value, state.value),
+            cycle.value,
+            datetime.time(hour.value, minute.value, second.value),
+            _PRESSURE_UNITS[units.value],
+            status.value,
+        )
 
     @property
     def dll_version(self):
@@ -321,8 +314,9 @@ class EvactronInterface(object):
         major = c.c_int()
         minor = c.c_int()
 
-        retval = self._dll.evbGetFirmwareVersion(self._handle,
-                                                 c.byref(major), c.byref(minor))
+        retval = self._dll.evbGetFirmwareVersion(
+            self._handle, c.byref(major), c.byref(minor)
+        )
         if retval != EVR_OK:
             raise EvactronException
 
@@ -337,8 +331,9 @@ class EvactronInterface(object):
         major = c.c_int()
         minor = c.c_int()
 
-        retval = self._dll.evbGetApplicationVersion(self._handle,
-                                                    c.byref(major), c.byref(minor))
+        retval = self._dll.evbGetApplicationVersion(
+            self._handle, c.byref(major), c.byref(minor)
+        )
         if retval != EVR_OK:
             raise EvactronException
 
@@ -359,15 +354,21 @@ class EvactronInterface(object):
         minute = c.c_int()
         second = c.c_int()
 
-        retval = \
-            self._dll.evbGetLastCleanTime(self._handle,
-                                          c.byref(month), c.byref(day), c.byref(year),
-                                          c.byref(hour), c.byref(minute), c.byref(second))
+        retval = self._dll.evbGetLastCleanTime(
+            self._handle,
+            c.byref(month),
+            c.byref(day),
+            c.byref(year),
+            c.byref(hour),
+            c.byref(minute),
+            c.byref(second),
+        )
         if retval != EVR_OK:
             raise EvactronException
 
-        return datetime.datetime(year.value, month.value, day.value,
-                                 hour.value, minute.value, second.value)
+        return datetime.datetime(
+            year.value, month.value, day.value, hour.value, minute.value, second.value
+        )
 
     @property
     def pressure_Pa(self):
@@ -380,7 +381,7 @@ class EvactronInterface(object):
         if retval != EVR_OK:
             raise EvactronException
 
-        return pressure.value * TORR2PA # Torr to Pa
+        return pressure.value * TORR2PA  # Torr to Pa
 
     @property
     def forward_power_W(self):
@@ -435,14 +436,15 @@ class EvactronInterface(object):
         minute = c.c_int()
         second = c.c_int()
 
-        retval = self._dll.evbGetRunTimer(self._handle, c.byref(hour),
-                                          c.byref(minute), c.byref(second))
+        retval = self._dll.evbGetRunTimer(
+            self._handle, c.byref(hour), c.byref(minute), c.byref(second)
+        )
         if retval != EVR_OK:
             raise EvactronException
 
         return datetime.time(hour.value, minute.value, second.value)
 
-#- General configuration
+    # - General configuration
 
     @property
     def clock(self):
@@ -458,23 +460,26 @@ class EvactronInterface(object):
         minute = c.c_int()
         second = c.c_int()
 
-        retval = self._dll.evbGetDate(self._handle, c.byref(month),
-                                      c.byref(day), c.byref(year))
+        retval = self._dll.evbGetDate(
+            self._handle, c.byref(month), c.byref(day), c.byref(year)
+        )
         if retval != EVR_OK:
             raise EvactronException
 
-        retval = self._dll.evbGetTime(self._handle, c.byref(hour),
-                                      c.byref(minute), c.byref(second))
+        retval = self._dll.evbGetTime(
+            self._handle, c.byref(hour), c.byref(minute), c.byref(second)
+        )
         if retval != EVR_OK:
             raise EvactronException
 
-        return datetime.datetime(year.value, month.value, day.value,
-                                 hour.value, minute.value, second.value)
+        return datetime.datetime(
+            year.value, month.value, day.value, hour.value, minute.value, second.value
+        )
 
     @clock.setter
     def clock(self, dt):
         self.disable()
-        time.sleep(0.1) # required
+        time.sleep(0.1)  # required
 
         day = c.c_int(dt.day)
         month = c.c_int(dt.month)
@@ -493,7 +498,7 @@ class EvactronInterface(object):
 
         self.enable()
 
-#- Plasma configuration
+    # - Plasma configuration
 
     @property
     def cycles(self):
@@ -527,21 +532,20 @@ class EvactronInterface(object):
         """
         pressure = c.c_float()
 
-        retval = self._dll.evbGetIgnitePressureSetpoint(self._handle,
-                                                        c.byref(pressure))
+        retval = self._dll.evbGetIgnitePressureSetpoint(self._handle, c.byref(pressure))
         if retval != EVR_OK:
             raise EvactronException
 
-        return pressure.value * TORR2PA # Torr to Pa
+        return pressure.value * TORR2PA  # Torr to Pa
 
     @ignite_pressure_setpoint_Pa.setter
     def ignite_pressure_setpoint_Pa(self, pressure):
         self.disable()
         time.sleep(0.1)
 
-        retval = \
-            self._dll.evbSetIgnitePressureSetpoint(self._handle,
-                                                   c.c_float(pressure / TORR2PA))
+        retval = self._dll.evbSetIgnitePressureSetpoint(
+            self._handle, c.c_float(pressure / TORR2PA)
+        )
         if retval != EVR_OK:
             raise EvactronException
 
@@ -554,21 +558,20 @@ class EvactronInterface(object):
         """
         pressure = c.c_float()
 
-        retval = self._dll.evbGetPlasmaPressureSetpoint(self._handle,
-                                                        c.byref(pressure))
+        retval = self._dll.evbGetPlasmaPressureSetpoint(self._handle, c.byref(pressure))
         if retval != EVR_OK:
             raise EvactronException
 
-        return pressure.value * TORR2PA # Torr to Pa
+        return pressure.value * TORR2PA  # Torr to Pa
 
     @plasma_pressure_setpoint_Pa.setter
     def plasma_pressure_setpoint_Pa(self, pressure):
         self.disable()
         time.sleep(0.1)
 
-        retval = \
-            self._dll.evbSetPlasmaPressureSetpoint(self._handle,
-                                                   c.c_float(pressure / TORR2PA))
+        retval = self._dll.evbSetPlasmaPressureSetpoint(
+            self._handle, c.c_float(pressure / TORR2PA)
+        )
         if retval != EVR_OK:
             raise EvactronException
 
@@ -614,8 +617,9 @@ class EvactronInterface(object):
         minute = c.c_int()
         second = c.c_int()
 
-        retval = self._dll.evbGetPlasmaTime(self._handle, c.byref(hour),
-                                            c.byref(minute), c.byref(second))
+        retval = self._dll.evbGetPlasmaTime(
+            self._handle, c.byref(hour), c.byref(minute), c.byref(second)
+        )
         if retval != EVR_OK:
             raise EvactronException
 
@@ -628,7 +632,7 @@ class EvactronInterface(object):
 
         hour = c.c_int(t.hour)
         minute = c.c_int(t.minute)
-        second = c.c_int((t.second / 10) * 10) # round down to closest ten
+        second = c.c_int((t.second / 10) * 10)  # round down to closest ten
 
         retval = self._dll.evbSetPlasmaTime(self._handle, hour, minute, second)
         if retval != EVR_OK:
@@ -668,21 +672,20 @@ class EvactronInterface(object):
         """
         pressure = c.c_float()
 
-        retval = self._dll.evbGetPurgePressureSetpoint(self._handle,
-                                                       c.byref(pressure))
+        retval = self._dll.evbGetPurgePressureSetpoint(self._handle, c.byref(pressure))
         if retval != EVR_OK:
             raise EvactronException
 
-        return pressure.value * TORR2PA # Torr to Pa
+        return pressure.value * TORR2PA  # Torr to Pa
 
     @purge_pressure_setpoint_Pa.setter
     def purge_pressure_setpoint_Pa(self, pressure):
         self.disable()
         time.sleep(0.1)
 
-        retval = \
-            self._dll.evbSetPurgePressureSetpoint(self._handle,
-                                                  c.c_float(pressure / TORR2PA))
+        retval = self._dll.evbSetPurgePressureSetpoint(
+            self._handle, c.c_float(pressure / TORR2PA)
+        )
         if retval != EVR_OK:
             raise EvactronException
 
@@ -704,8 +707,9 @@ class EvactronInterface(object):
         minute = c.c_int()
         second = c.c_int()
 
-        retval = self._dll.evbGetPurgeTime(self._handle, c.byref(hour),
-                                           c.byref(minute), c.byref(second))
+        retval = self._dll.evbGetPurgeTime(
+            self._handle, c.byref(hour), c.byref(minute), c.byref(second)
+        )
         if retval != EVR_OK:
             raise EvactronException
 
@@ -718,11 +722,10 @@ class EvactronInterface(object):
 
         hour = c.c_int(t.hour)
         minute = c.c_int(t.minute)
-        second = c.c_int((t.second / 10) * 10) # round down to closest ten
+        second = c.c_int((t.second / 10) * 10)  # round down to closest ten
 
         retval = self._dll.evbSetPurgeTime(self._handle, hour, minute, second)
         if retval != EVR_OK:
             raise EvactronException
 
         self.enable()
-
